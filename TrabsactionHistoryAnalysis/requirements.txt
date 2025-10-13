@@ -1,0 +1,7 @@
+matplotlib
+langchain-core
+langchain-google-vertexai
+langchain-experimental
+langchain-community
+langgraph
+pydantic

@@ -8,6 +8,12 @@ matplotlib.use('Agg')
 import os
 from agents import AgentOrchestrator
 
+# Get the absolute path to the project root directory (TrabsactionHistoryAnalysis)
+# This is two levels up from the current file (src/multi_agent_main.py)
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# Change the current working directory to the project root
+os.chdir(PROJECT_ROOT)
+
 def main():
     """
     The main entry point for the multi-agent system.
