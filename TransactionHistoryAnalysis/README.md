@@ -15,15 +15,15 @@ This project analyzes transaction history data to identify spending patterns and
 
 ## Usage
 
-1.  Navigate to the `TrabsactionHistoryAnalysis` directory:
+1.  Navigate to the `TransactionHistoryAnalysis` directory:
     ```bash
-    cd TrabsactionHistoryAnalysis
+    cd TransactionHistoryAnalysis
     ```
 2.  Configure your credentials in `src/config.py`:
     ```python
     # config.py
     PROJECT_ID = "your-google-cloud-project-id"
-    MODEL_NAME = "gemini-1.5-flash-001"
+    MODEL_NAME = "gemini-2.5-flash"
     MAX_TURNS = 10
     ```
 3.  Run the application:
