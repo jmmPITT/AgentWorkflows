@@ -23,7 +23,7 @@ This project analyzes transaction history data to identify spending patterns and
     ```python
     # config.py
     PROJECT_ID = "your-google-cloud-project-id"
-    MODEL_NAME = "gemini-1.5-flash-001"
+    MODEL_NAME = "gemini-2.5-flash"
     MAX_TURNS = 10
     ```
 3.  Run the application:
