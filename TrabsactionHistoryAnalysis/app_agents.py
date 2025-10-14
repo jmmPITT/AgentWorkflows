@@ -14,6 +14,17 @@ from graph_builder import create_agent_workflow
 from rag_agent import RAGAgent
 import config
 
+def summarize_tool_output(output: str, max_length: int = 1500) -> str:
+    """Truncates the output of a tool to prevent prompt poisoning."""
+    if len(output) > max_length:
+        truncated_output = output[:max_length]
+        # Try to find the last newline to avoid cutting a line in the middle
+        last_newline = truncated_output.rfind('\n')
+        if last_newline != -1:
+            truncated_output = truncated_output[:last_newline]
+        return truncated_output + "\n\n... [Output truncated for brevity] ..."
+    return output
+
 class AppAgentOrchestrator:
     """A modified AgentOrchestrator that yields events for a Streamlit app."""
     def __init__(self):
@@ -32,8 +43,8 @@ class AppAgentOrchestrator:
         structured_log = []
         supplemental_rag_context = "No context retrieved yet. This is the first turn."
         
-        for i in range(5):
-            yield {"type": "system", "author": "System", "content": f"🔄 Inner Cycle {i + 1}/5"}
+        for i in range(7):
+            yield {"type": "system", "author": "System", "content": f"🔄 Inner Cycle {i + 1}/7"}
 
             try:
                 directory_listing = os.listdir("output")
@@ -137,6 +148,11 @@ class AppAgentOrchestrator:
                         for message in value["messages"]:
                             if isinstance(message, ToolMessage):
                                 analyst_tool_output += message.content + "\n"
+
+            # <<< MODIFICATION IS HERE >>>
+            # Sanitize the analyst's output before adding it to the history
+            summarized_analyst_output = summarize_tool_output(analyst_tool_output)
+
             
             files_after = set(os.listdir("output")) if os.path.exists("output") else set()
             new_files = files_after - files_before
@@ -147,9 +163,10 @@ class AppAgentOrchestrator:
                 yield {"type": "attachment", "author": "Analyst", "content": f"Generated plot: `{os.path.basename(plot_path)}`", "path": plot_path}
 
             structured_log.append({ "directive": directive, "result": analyst_tool_output, "plots": generated_plots })
-            analyst_summary_for_stat = f"Task complete. Output:\n{analyst_tool_output}"
+            
+            # Use the SUMMARIZED output for the next agent's context
+            analyst_summary_for_stat = f"Task complete. Output summary:\n{summarized_analyst_output}"
             conversation_history.append(HumanMessage(content=[{"type": "text", "text": analyst_summary_for_stat}]))
-        
         yield {"type": "system", "author": "System", "content": "✍️  Statistician is writing the cycle report..."}
         
         all_figures_this_cycle = sorted(list(set(p for entry in structured_log for p in entry['plots'])))
