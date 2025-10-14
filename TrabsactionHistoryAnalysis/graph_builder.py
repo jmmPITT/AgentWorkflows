@@ -10,12 +10,10 @@ class AgentState(TypedDict):
     messages: Annotated[Sequence[BaseMessage], add_messages]
     turn_counter: int
 
-# NEW: The function now accepts an optional 'internal_turn_limit'
 def create_agent_workflow(llm, tools, internal_turn_limit: int = None):
     """Creates a compiled LangGraph agent workflow."""
     model_with_tools = llm.bind_tools(tools)
     
-    # Use the specific internal limit if provided, otherwise use the main config
     max_turns = internal_turn_limit if internal_turn_limit is not None else config.MAX_TURNS
 
     def call_model(state: AgentState):
@@ -26,7 +24,6 @@ def create_agent_workflow(llm, tools, internal_turn_limit: int = None):
     def should_continue(state: AgentState):
         last_message = state["messages"][-1]
         if last_message.tool_calls:
-            # The check now uses our 'max_turns' variable
             if state.get("turn_counter", 0) >= max_turns:
                 return END
             return "call_tool"
