@@ -1,82 +1,85 @@
 # rag_agent.py
-
 import os
-from langchain_google_vertexai import VertexAIEmbeddings
-from langchain_community.document_loaders import PyPDFLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.vectorstores import Chroma
-import config # Your existing config file
+import config
+from langchain_google_vertexai import ChatVertexAI, VertexAIEmbeddings
+from langchain_community.vectorstores import FAISS
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.runnables import RunnablePassthrough, RunnableParallel
+from langchain_core.output_parsers import StrOutputParser
 
-# --- CONFIGURATION ---
-TEXTBOOK_PATH = "rag_source/bayesian_data_analysis.pdf"
-VECTOR_STORE_PATH = "rag_db"
-EMBEDDING_MODEL_NAME = "text-embedding-004"
-
-def format_docs(docs):
-    """Helper function to format retrieved documents into a single string."""
-    return "\n\n".join(doc.page_content for doc in docs)
+# --- Configuration ---
+VECTOR_STORE_PATH = "faiss_index"
 
 class RAGAgent:
-    """
-    An agent dedicated to retrieving supplemental context from a textbook
-    to inform the statistician's reasoning process.
-    """
+    """An agent that performs Retrieval-Augmented Generation using a local FAISS vector store."""
     def __init__(self):
-        """Initializes the RAG agent by creating or loading the vector store."""
-        print("--- Initializing RAG Agent ---")
-        self._vector_store = self._create_or_load_vector_store()
-        self.retriever = self._vector_store.as_retriever(search_kwargs={"k": 3}) # Retrieve top 3 relevant chunks
-        print("--- RAG Agent Initialized Successfully ---")
+        print("--- 🚀 Initializing RAG Agent ---")
+        if not os.path.exists(VECTOR_STORE_PATH):
+            print(f"❌ Error: Vector store not found at '{VECTOR_STORE_PATH}'.")
+            print("Please run 'create_vector_store.py' first.")
+            raise FileNotFoundError(f"Vector store not found at '{VECTOR_STORE_PATH}'")
 
-    def _create_or_load_vector_store(self):
+        # 1. Initialize the models (LLM and Embeddings)
+        # The embedding model MUST match the one used to create the store.
+        self.embeddings = VertexAIEmbeddings(
+            model_name="text-embedding-004", 
+            project=config.PROJECT_ID
+        )
+        self.llm = ChatVertexAI(
+            project=config.PROJECT_ID, 
+            model_name=config.MODEL_NAME
+        )
+
+        # 2. Load the local FAISS vector store
+        print(f"📂 Loading vector store from '{VECTOR_STORE_PATH}'...")
+        vector_store = FAISS.load_local(VECTOR_STORE_PATH, self.embeddings, allow_dangerous_deserialization=True)
+        self.retriever = vector_store.as_retriever()
+        print("✅ Vector store loaded successfully.")
+
+        # 3. Define the RAG prompt template
+        template = """
+        You are an expert on Bayesian data analysis. Answer the user's question based only on the following context.
+        If the context doesn't contain the answer, state that you don't have enough information.
+
+        Context:
+        {context}
+
+        Question:
+        {question}
+
+        Answer:
         """
-        Creates a new vector store from the textbook or loads an existing one.
-        This is the INGESTION pipeline. It runs only if the database doesn't exist.
-        """
-        if os.path.exists(VECTOR_STORE_PATH):
-            print(f"--- RAG: Loading existing vector store from '{VECTOR_STORE_PATH}' ---")
-            embeddings = VertexAIEmbeddings(model_name=EMBEDDING_MODEL_NAME, project=config.PROJECT_ID)
-            vector_store = Chroma(persist_directory=VECTOR_STORE_PATH, embedding_function=embeddings)
-            return vector_store
-        else:
-            print(f"--- RAG: No vector store found. Creating a new one from '{TEXTBOOK_PATH}' ---")
-            
-            # 1. Load the document
-            print("RAG: Loading PDF...")
-            loader = PyPDFLoader(TEXTBOOK_PATH)
-            docs = loader.load()
-            print(f"RAG: Loaded {len(docs)} pages from the book.")
+        self.prompt = ChatPromptTemplate.from_template(template)
 
-            # 2. Split the document into chunks
-            print("RAG: Splitting document into chunks...")
-            text_splitter = RecursiveCharacterTextSplitter(chunk_size=2000, chunk_overlap=200)
-            splits = text_splitter.split_documents(docs)
-            print(f"RAG: Document split into {len(splits)} chunks.")
-
-            # 3. Create the embedding model
-            print(f"RAG: Initializing embedding model '{EMBEDDING_MODEL_NAME}'...")
-            embeddings = VertexAIEmbeddings(model_name=EMBEDDING_MODEL_NAME, project=config.PROJECT_ID)
-
-            # 4. Ingest chunks into ChromaDB
-            print("RAG: Ingesting chunks into ChromaDB. This may take a few minutes...")
-            vector_store = Chroma.from_documents(
-                documents=splits,
-                embedding=embeddings,
-                persist_directory=VECTOR_STORE_PATH
+        # 4. Build the RAG chain using LangChain Expression Language (LCEL)
+        self.rag_chain = (
+            RunnableParallel(
+                {"context": self.retriever, "question": RunnablePassthrough()}
             )
-            print("--- RAG: Vector store created and persisted successfully. ---")
-            return vector_store
+            | self.prompt
+            | self.llm
+            | StrOutputParser()
+        )
+        print("--- ✅ RAG Agent Initialized ---")
 
-    def retrieve_context(self, query: str) -> str:
-        """
-        Retrieves relevant context from the textbook based on a query.
-        The query is expected to be the 'thought' process of the statistician.
-        """
-        print(f"--- RAG: Retrieving context for query: '{query[:80]}...' ---")
-        if not query:
-            return "No query was provided for context retrieval."
+    def answer(self, query: str):
+        """Answers a query using the RAG chain."""
+        print(f"\n--- 🤔 Querying RAG Agent with: '{query}' ---")
+        return self.rag_chain.invoke(query)
+
+# --- Example Usage (for testing) ---
+if __name__ == '__main__':
+    try:
+        rag_agent = RAGAgent()
         
-        retrieved_docs = self.retriever.invoke(query)
-        formatted_context = format_docs(retrieved_docs)
-        print("--- RAG: Context retrieval complete. ---")
-        return formatted_context
+        # Example query
+        query = "What is the core idea of Bayesian inference?"
+        result = rag_agent.answer(query)
+        
+        print("\n--- 🎓 RAG Agent's Answer ---")
+        print(result)
+
+    except FileNotFoundError as e:
+        print(e)
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
