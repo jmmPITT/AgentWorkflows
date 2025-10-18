@@ -82,19 +82,19 @@ These counts highlight the primary types of transactions and the most frequent e
 
 The histogram below illustrates the distribution of transaction amounts. It appears to be somewhat bi-modal or skewed, with a concentration of transactions around smaller negative and positive values, and fewer very large transactions.
 
-![Distribution of Transaction Amounts](/output/amount_distribution.png)
+![Distribution of Transaction Amounts](./amount_distribution.png)
 
 ### Distribution of Account Balance
 
 The distribution of the account balance shows a fairly spread-out pattern, indicating various balance levels throughout the recorded period. There appears to be a noticeable peak around the 10,000 to 15,000 mark.
 
-![Distribution of Account Balance](/output/balance_distribution.png)
+![Distribution of Account Balance](./balance_distribution.png)
 
 ### Account Balance Over Time
 
 The line plot below shows the evolution of the account balance over time. It reveals fluctuations, with periods of increase and decrease. There are distinct drops and recoveries, indicating significant financial activities or events.
 
-![Account Balance Over Time](/output/balance_over_time.png)
+![Account Balance Over Time](./balance_over_time.png)
 
 ## 6. Conclusion
 

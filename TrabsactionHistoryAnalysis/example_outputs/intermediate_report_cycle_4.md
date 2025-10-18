@@ -80,7 +80,7 @@ This report presents an analysis of key financial movements within the account, 
 
 The following plot illustrates the account balance fluctuations over time, with the top 5 debit and credit transactions explicitly marked to show their impact.
 
-![Account Balance Over Time with Top Transactions Highlighted](/output/annotated_balance_over_time.png)
+![Account Balance Over Time with Top Transactions Highlighted](./annotated_balance_over_time.png)
 
 ## Correlative Analysis of Account Balance Movements with Top Transactions
 
