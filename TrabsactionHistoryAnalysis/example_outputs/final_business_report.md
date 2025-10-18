@@ -44,7 +44,7 @@ The analysis was performed on the `artisan_digital_transactions.csv` dataset, wh
 
 The account balance over time shows a fluctuating pattern, with periods of both increase and decrease. The overall trend indicates significant variability driven by specific financial events.
 
-![Account Balance Over Time with Top Transactions Highlighted](/output/annotated_balance_over_time.png)
+![Account Balance Over Time with Top Transactions Highlighted](./annotated_balance_over_time.png)
 
 ### 2.2 Impact of Significant Transactions
 
@@ -62,7 +62,7 @@ To understand the business's financial health on a periodic basis, a net monthly
 
 The bar chart below illustrates the net cash flow for each month. Positive cash flows (green) indicate periods of financial growth, while negative cash flows (red) indicate periods where outflows exceeded inflows.
 
-![Net Monthly Cash Flow](/output/net_monthly_cash_flow.png)
+![Net Monthly Cash Flow](./net_monthly_cash_flow.png)
 
 **Key Monthly Highlights:**
 
@@ -73,13 +73,13 @@ The bar chart below illustrates the net cash flow for each month. Positive cash 
 
 June 2023 demonstrated the strongest financial performance, primarily driven by substantial "Client Payments," indicating successful project completions or service deliveries during this period.
 
-![Category Breakdown for Largest Positive Net Cash Flow Month (June 2023)](/output/max_cash_flow_month_2023-06_category_breakdown.png)
+![Category Breakdown for Largest Positive Net Cash Flow Month (June 2023)](./max_cash_flow_month_2023-06_category_breakdown.png)
 
 ### 3.2 Deep Dive: Largest Negative Month (April 2023)
 
 April 2023 experienced the most significant net outflow. This month was characterized by various operational expenses, with multiple categories contributing to the negative cash flow, highlighting a period of increased expenditure without corresponding high-value inflows.
 
-![Category Breakdown for Largest Negative Net Cash Flow Month (April 2023)](/output/min_cash_flow_month_2023-04_category_breakdown.png)
+![Category Breakdown for Largest Negative Net Cash Flow Month (April 2023)](./min_cash_flow_month_2023-04_category_breakdown.png)
 
 ---
 
