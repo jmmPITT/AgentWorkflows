@@ -6,7 +6,7 @@ Integrates PDF processing with multi-agent analysis
 import sys
 import os
 from dotenv import load_dotenv
-sys.path.append(os.path.join(os.path.dirname(__file__), 'scientific_review_crew', 'src'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from tools.pdf_tools import PDFTool
 from crew import assemble_crew

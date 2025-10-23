@@ -10,6 +10,14 @@ This system represents a paradigm shift from commercial publishing interests bac
 
 ## ✨ Features
 
+### 🌐 **NEW: Interactive Web Application**
+- **Retro Terminal Interface**: Beautiful old-school computing aesthetic with green-on-black display
+- **Real-time Progress Tracking**: Live updates from all specialist agents during analysis
+- **Interactive Specialist Reports**: Click any specialist button to view detailed reports in pop-out windows
+- **Drag & Drop Upload**: Easy PDF upload with visual feedback
+- **Session Management**: Automatic session recovery and persistent state
+- **Responsive Design**: Works on desktop and mobile devices
+
 ### 🔬 Elite Scientific Reviewers
 - **9 Specialist Domains**: Medical, Engineering, Physics, Chemistry, Biology, Computer Science, Mathematics, Artificial Intelligence, Data Science
 - **Uncompromising Standards**: Focus on methodological rigor, reproducibility, statistical soundness, and intellectual honesty
@@ -32,6 +40,7 @@ This system represents a paradigm shift from commercial publishing interests bac
 - **Individual Specialist Reports**: Each domain expert provides detailed analysis
 - **Comprehensive Synthesis**: Unified assessment highlighting consensus and disagreement
 - **Editorial Decision**: Clear publish/reject decision with detailed justification
+- **Interactive Report Viewer**: Click specialist buttons to view full reports in modal windows
 - **Markdown Output**: All reports saved as professional markdown files
 
 ## 🚀 Quick Start
@@ -73,6 +82,24 @@ cp .env.example .env
 
 ### Usage
 
+#### 🌐 **Web Application (Recommended)**
+
+1. **Start the web application**
+```bash
+cd scientific_review_webapp
+python complete_app.py
+```
+
+2. **Open your browser** and go to `http://localhost:5000`
+
+3. **Upload your PDF** using the drag & drop interface
+
+4. **Watch real-time progress** as specialist agents analyze your paper
+
+5. **View results** with interactive specialist report buttons
+
+#### 💻 **Command Line Interface**
+
 1. **Place your research paper PDF** in the project directory as `research_paper.pdf`
 
 2. **Run the review**
@@ -86,22 +113,29 @@ python run_review.py
 
 ```
 scientific_review_crew/
+├── scientific_review_webapp/    # 🌐 NEW: Interactive Web Application
+│   ├── complete_app.py         # Main Flask web application
+│   ├── run_review.py           # Crew execution with web integration
+│   ├── templates/
+│   │   └── terminal.html       # Retro terminal interface
+│   ├── reports/                # Webapp-specific reports directory
+│   └── uploads/                # PDF upload storage
 ├── src/
-│   ├── agents.py          # Elite reviewer agent definitions
-│   ├── tasks.py           # Review task configurations
-│   ├── crew.py            # Crew assembly and execution
+│   ├── agents.py               # Elite reviewer agent definitions
+│   ├── tasks.py                # Review task configurations
+│   ├── crew.py                 # Crew assembly and execution
 │   └── tools/
-│       ├── pdf_tools.py   # PDF processing and page extraction
-│       └── search_tools.py # Web search verification
-├── reports/               # Generated review reports
-│   └── research_paper_*/  # Timestamped review sessions
-├── output/               # PDF processing outputs
-│   └── pages/            # Extracted page images
-├── main.py               # LLM configuration
-├── run_review.py         # Main execution script
-├── requirements.txt      # Python dependencies
-├── .env.example         # Environment configuration template
-└── README.md            # This file
+│       ├── pdf_tools.py        # PDF processing and page extraction
+│       └── search_tools.py     # Web search verification
+├── reports/                    # Generated review reports
+│   └── research_paper_*/       # Timestamped review sessions
+├── output/                     # PDF processing outputs
+│   └── pages/                  # Extracted page images
+├── main.py                     # LLM configuration
+├── run_review.py               # Command-line execution script
+├── requirements.txt            # Python dependencies
+├── .env.example               # Environment configuration template
+└── README.md                  # This file
 ```
 
 ## 🔧 Configuration
@@ -129,6 +163,32 @@ The system generates comprehensive reports including:
 - **Review Summary**: Overview of the entire review process
 
 See the `reports/` directory for example outputs from real scientific papers.
+
+## 🌐 Web Application Features
+
+### 🎨 **Retro Terminal Interface**
+- **Authentic 80s Computing**: Green phosphor display with scanlines and monospace fonts
+- **Interactive Elements**: Hover effects, button animations, and visual feedback
+- **Responsive Design**: Works seamlessly on desktop and mobile devices
+- **Accessibility**: High contrast and clear typography for readability
+
+### 📊 **Real-time Progress Tracking**
+- **Live Agent Updates**: See each specialist agent's progress in real-time
+- **Status Messages**: Detailed logging of PDF processing, crew deployment, and analysis
+- **Progress Indicators**: Visual feedback during long-running operations
+- **Error Handling**: Clear error messages and recovery suggestions
+
+### 🔍 **Interactive Report Viewer**
+- **Specialist Report Buttons**: Click any specialist to view their detailed analysis
+- **Modal Windows**: Full-screen report viewing with proper formatting
+- **Markdown Rendering**: Professional formatting with headers, lists, and emphasis
+- **Easy Navigation**: Simple close buttons and keyboard shortcuts
+
+### 💾 **Session Management**
+- **Automatic Recovery**: Sessions persist across webapp restarts
+- **File Upload**: Drag & drop PDF upload with validation
+- **Report Storage**: All reports saved in organized, timestamped directories
+- **State Persistence**: Review progress maintained even if browser is closed
 
 ## 🎯 Review Criteria
 
