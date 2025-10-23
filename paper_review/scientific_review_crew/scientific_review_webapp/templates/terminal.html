@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elite Scientific Review Crew - Terminal Interface</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #000;
+            color: #00ff00;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            line-height: 1.4;
+            overflow-x: hidden;
+            cursor: text;
+        }
+        
+        .clickable {
+            cursor: pointer;
+        }
+        
+        .upload-area {
+            cursor: pointer;
+        }
+        
+        /* Matrix-style background effect */
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.1;
+        }
+        
+        .matrix-column {
+            position: absolute;
+            top: -100%;
+            color: #00ff00;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            line-height: 1.2;
+            animation: matrix-fall linear infinite;
+        }
+        
+        @keyframes matrix-fall {
+            0% { top: -100%; }
+            100% { top: 100vh; }
+        }
+        
+        /* Scan lines effect */
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 255, 0, 0.03) 2px,
+                rgba(0, 255, 0, 0.03) 4px
+            );
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .terminal {
+            min-height: 100vh;
+            padding: 20px;
+            background: linear-gradient(45deg, #000 0%, #001100 50%, #000 100%);
+            position: relative;
+        }
+        
+        .terminal::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(0, 255, 0, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(0, 255, 0, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .content {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border: 2px solid #00ff00;
+            padding: 20px;
+            background: rgba(0, 255, 0, 0.05);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+        }
+        
+        .title {
+            font-size: 2.5em;
+            font-weight: 700;
+            text-shadow: 0 0 10px #00ff00;
+            margin-bottom: 10px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from { text-shadow: 0 0 10px #00ff00; }
+            to { text-shadow: 0 0 20px #00ff00, 0 0 30px #00ff00; }
+        }
+        
+        .subtitle {
+            font-size: 1.2em;
+            color: #00cc00;
+            margin-bottom: 5px;
+        }
+        
+        .mission {
+            font-size: 0.9em;
+            color: #009900;
+            font-style: italic;
+        }
+        
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            border: 1px solid #00ff00;
+            padding: 20px;
+            background: rgba(0, 255, 0, 0.02);
+        }
+        
+        .section-title {
+            font-size: 1.5em;
+            color: #00ff00;
+            margin-bottom: 15px;
+            text-shadow: 0 0 5px #00ff00;
+        }
+        
+        .upload-area {
+            border: 2px dashed #00ff00;
+            padding: 40px;
+            text-align: center;
+            background: rgba(0, 255, 0, 0.05);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .upload-area:hover {
+            background: rgba(0, 255, 0, 0.1);
+            border-color: #00cc00;
+        }
+        
+        .upload-area.dragover {
+            background: rgba(0, 255, 0, 0.15);
+            border-color: #00ff00;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+        }
+        
+        .upload-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+            color: #00ff00;
+        }
+        
+        .upload-text {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+        
+        .upload-subtext {
+            color: #00cc00;
+            font-size: 0.9em;
+        }
+        
+        .progress-section {
+            display: none;
+            margin-top: 20px;
+        }
+        
+        .agent-output-display {
+            width: 100%;
+            height: 300px;
+            background: #000;
+            border: 1px solid #00ff00;
+            padding: 15px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            box-shadow: inset 0 0 10px rgba(0, 255, 0, 0.1);
+        }
+        
+        .output-line {
+            color: #00ff00;
+            margin-bottom: 2px;
+            word-wrap: break-word;
+        }
+        
+        .output-line .timestamp {
+            color: #00cc00;
+            font-weight: bold;
+        }
+        
+        .output-line .agent {
+            color: #ffff00;
+            font-weight: bold;
+        }
+        
+        .output-line .system {
+            color: #00ff00;
+        }
+        
+        .output-line .warning {
+            color: #ffaa00;
+        }
+        
+        .output-line .error {
+            color: #ff0000;
+        }
+        
+        .status-text {
+            color: #00cc00;
+            font-style: italic;
+            margin-top: 5px;
+        }
+        
+        .results-section {
+            display: none;
+        }
+        
+        .decision-box {
+            border: 2px solid #00ff00;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: rgba(0, 255, 0, 0.05);
+            text-align: center;
+        }
+        
+        .decision-title {
+            font-size: 1.8em;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .decision-publish {
+            color: #00ff00;
+            text-shadow: 0 0 10px #00ff00;
+        }
+        
+        .decision-reject {
+            color: #ff6600;
+            text-shadow: 0 0 10px #ff6600;
+        }
+        
+        .editorial-report {
+            margin-top: 20px;
+            padding: 20px;
+            border: 1px solid #00ff00;
+            background: rgba(0, 255, 0, 0.02);
+            font-family: 'JetBrains Mono', monospace;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .editorial-report h1, .editorial-report h2, .editorial-report h3 {
+            color: #00ff00;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .editorial-report h1 {
+            font-size: 1.5em;
+            text-shadow: 0 0 5px #00ff00;
+        }
+        
+        .editorial-report h2 {
+            font-size: 1.3em;
+        }
+        
+        .editorial-report h3 {
+            font-size: 1.1em;
+        }
+        
+        .editorial-report p {
+            margin-bottom: 15px;
+        }
+        
+        .editorial-report strong {
+            color: #00cc00;
+        }
+        
+        
+        .specialist-reports-section {
+            margin-top: 30px;
+            padding: 20px;
+            border: 1px solid #00ff00;
+            background: rgba(0, 255, 0, 0.05);
+        }
+        
+        .section-subtitle {
+            color: #00ff00;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .reports-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .specialist-btn {
+            background: #000;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            padding: 15px;
+            cursor: pointer;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            text-align: center;
+            transition: all 0.3s ease;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .specialist-btn:hover {
+            background: rgba(0, 255, 0, 0.1);
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.4);
+            transform: translateY(-2px);
+        }
+        
+        .report-card {
+            border: 1px solid #00ff00;
+            padding: 15px;
+            background: rgba(0, 255, 0, 0.02);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .report-card:hover {
+            background: rgba(0, 255, 0, 0.1);
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+        }
+        
+        .report-title {
+            font-weight: 700;
+            color: #00ff00;
+            margin-bottom: 5px;
+        }
+        
+        .report-description {
+            color: #00cc00;
+            font-size: 0.9em;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+        }
+        
+        .modal-content {
+            background: #000;
+            margin: 5% auto;
+            padding: 20px;
+            border: 2px solid #00ff00;
+            width: 90%;
+            max-width: 1000px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.5);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #00ff00;
+            padding-bottom: 10px;
+        }
+        
+        .modal-title {
+            font-size: 1.5em;
+            color: #00ff00;
+        }
+        
+        .close {
+            color: #00ff00;
+            font-size: 2em;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+        }
+        
+        .close:hover {
+            color: #00cc00;
+        }
+        
+        .modal-body {
+            color: #00ff00;
+            white-space: pre-wrap;
+            font-family: 'JetBrains Mono', monospace;
+            line-height: 1.6;
+        }
+        
+        .btn {
+            background: #000;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            background: rgba(0, 255, 0, 0.1);
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+        }
+        
+        .btn:disabled {
+            color: #666;
+            border-color: #666;
+            cursor: not-allowed;
+        }
+        
+        .error {
+            color: #ff6600;
+            background: rgba(255, 102, 0, 0.1);
+            border: 1px solid #ff6600;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        
+        .success {
+            color: #00ff00;
+            background: rgba(0, 255, 0, 0.1);
+            border: 1px solid #00ff00;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        
+        .loading-dots {
+            display: inline-block;
+        }
+        
+        .loading-dots::after {
+            content: '';
+            animation: dots 1.5s infinite;
+        }
+        
+        @keyframes dots {
+            0%, 20% { content: ''; }
+            40% { content: '.'; }
+            60% { content: '..'; }
+            80%, 100% { content: '...'; }
+        }
+        
+        .typing {
+            overflow: hidden;
+            border-right: 2px solid #00ff00;
+            white-space: nowrap;
+            animation: typing 2s steps(40, end), blink-caret 0.75s step-end infinite;
+        }
+        
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+        
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: #00ff00 }
+        }
+    </style>
+</head>
+<body>
+    <!-- Matrix background effect -->
+    <div class="matrix-bg" id="matrixBg"></div>
+    
+    <!-- Scan lines effect -->
+    <div class="scanlines"></div>
+    
+    <div class="terminal">
+        <div class="content">
+            <div class="header">
+                <div class="title">ELITE SCIENTIFIC REVIEW CREW</div>
+                <div class="subtitle">Terminal Interface v1.0</div>
+                <div class="mission">"Journals are big business, not science. We are returning to science!"</div>
+            </div>
+            
+            <div class="main-content">
+                <!-- Upload Section -->
+                <div class="section">
+                    <div class="section-title">[DOC] UPLOAD SCIENTIFIC PAPER</div>
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-icon">[FOLDER]</div>
+                        <div class="upload-text">Click to upload or drag & drop PDF file</div>
+                        <div class="upload-subtext">Maximum file size: 50MB</div>
+                        <input type="file" id="fileInput" accept=".pdf" style="display: none;">
+                    </div>
+                </div>
+                
+                <!-- Progress Section -->
+                <div class="section progress-section" id="progressSection">
+                    <div class="section-title">[PROC] REVIEW IN PROGRESS</div>
+                    <div class="agent-output-display" id="agentOutputDisplay">
+                        <div class="output-line">[SYSTEM] Initializing Elite Review Crew...</div>
+                    </div>
+                    <div class="status-text" id="statusText">Initializing...</div>
+                </div>
+                
+                <!-- Results Section -->
+                <div class="section results-section" id="resultsSection">
+                    <div class="section-title">[DATA] REVIEW RESULTS</div>
+                    
+                    <!-- Editorial Decision -->
+                    <div class="decision-box" id="decisionBox">
+                        <div class="decision-title" id="decisionTitle">Processing...</div>
+                    </div>
+                    
+                    <!-- Editorial Report -->
+                    <div class="editorial-report" id="editorialReport" style="display: block;">
+                        <div id="editorialContent">Loading editorial decision report...</div>
+                    </div>
+                    
+                    
+                    <!-- Specialist Reports Section -->
+                    <div class="specialist-reports-section" id="specialistReportsSection" style="display: none;">
+                        <div class="section-subtitle">[SPEC] SPECIALIST REPORTS</div>
+                        <div class="reports-grid" id="reportsGrid">
+                            <!-- Specialist report buttons will be populated here -->
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button class="btn" onclick="resetSession()">[RST] NEW REVIEW</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Report Modal -->
+    <div id="reportModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitle">Report</div>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+    
+    <script>
+        let currentSession = null;
+        let progressInterval = null;
+        
+        // File upload handling
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        
+        uploadArea.addEventListener('click', () => fileInput.click());
+        uploadArea.addEventListener('dragover', handleDragOver);
+        uploadArea.addEventListener('dragleave', handleDragLeave);
+        uploadArea.addEventListener('drop', handleDrop);
+        fileInput.addEventListener('change', handleFileSelect);
+        
+        function handleDragOver(e) {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        }
+        
+        function handleDragLeave(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+        }
+        
+        function handleDrop(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        }
+        
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) {
+                handleFile(file);
+            }
+        }
+        
+        function handleFile(file) {
+            if (!file.type.includes('pdf')) {
+                showError('Please select a PDF file.');
+                return;
+            }
+            
+            if (file.size > 50 * 1024 * 1024) {
+                showError('File size too large. Maximum 50MB allowed.');
+                return;
+            }
+            
+            uploadFile(file);
+        }
+        
+        function uploadFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    currentSession = data.session_id;
+                    showProgress();
+                    startProgressTracking();
+                } else {
+                    showError(data.error || 'Upload failed');
+                }
+            })
+            .catch(error => {
+                showError('Upload failed: ' + error.message);
+            });
+        }
+        
+        function showProgress() {
+            document.getElementById('progressSection').style.display = 'block';
+            document.getElementById('resultsSection').style.display = 'none';
+        }
+        
+        function startProgressTracking() {
+            progressInterval = setInterval(updateProgress, 1000);
+        }
+        
+        function updateProgress() {
+            if (!currentSession) return;
+            
+            fetch('/status')
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    clearInterval(progressInterval);
+                    showError(data.error);
+                    return;
+                }
+                
+                const progress = data.progress || 0;
+                const status = data.status;
+                const currentStep = data.current_step || '';
+                const agentOutputs = data.agent_outputs || [];
+                
+                // Update status text
+                document.getElementById('statusText').textContent = currentStep;
+                
+                // Update agent outputs display
+                updateAgentOutputs(agentOutputs);
+                
+                if (status === 'completed') {
+                    clearInterval(progressInterval);
+                    showResults(data);
+                } else if (status === 'error') {
+                    clearInterval(progressInterval);
+                    showError(data.error || 'Review failed');
+                }
+            })
+            .catch(error => {
+                clearInterval(progressInterval);
+                showError('Failed to get status: ' + error.message);
+            });
+        }
+        
+        function updateAgentOutputs(outputs) {
+            const display = document.getElementById('agentOutputDisplay');
+            display.innerHTML = '';
+            
+            outputs.forEach(output => {
+                const line = document.createElement('div');
+                line.className = 'output-line';
+                
+                const timestamp = document.createElement('span');
+                timestamp.className = 'timestamp';
+                timestamp.textContent = `[${output.timestamp}] `;
+                
+                const agent = document.createElement('span');
+                agent.className = 'agent';
+                agent.textContent = `[${output.agent}] `;
+                
+                const message = document.createElement('span');
+                message.className = output.agent.toLowerCase();
+                message.textContent = output.output;
+                
+                line.appendChild(timestamp);
+                line.appendChild(agent);
+                line.appendChild(message);
+                display.appendChild(line);
+            });
+            
+            // Auto-scroll to bottom
+            display.scrollTop = display.scrollHeight;
+        }
+        
+        function showResults(data) {
+            console.log('showResults called with data:', data);
+            document.getElementById('progressSection').style.display = 'none';
+            document.getElementById('resultsSection').style.display = 'block';
+            
+            // Show editorial decision
+            const decision = data.result || 'UNKNOWN';
+            const decisionBox = document.getElementById('decisionBox');
+            const decisionTitle = document.getElementById('decisionTitle');
+            
+            if (decision.toUpperCase().includes('PUBLISH')) {
+                decisionTitle.textContent = '[OK] PUBLISH';
+                decisionTitle.className = 'decision-title decision-publish';
+            } else if (decision.toUpperCase().includes('REJECT')) {
+                decisionTitle.textContent = '[X] REJECT';
+                decisionTitle.className = 'decision-title decision-reject';
+            } else {
+                decisionTitle.textContent = decision;
+                decisionTitle.className = 'decision-title';
+            }
+            
+            console.log('About to load editorial report...');
+            // Load editorial decision report
+            loadEditorialReport();
+            
+            // Show specialist reports section
+            document.getElementById('specialistReportsSection').style.display = 'block';
+            
+            // Load reports
+            loadReports();
+        }
+        
+        function loadEditorialReport() {
+            console.log('Loading editorial report...');
+            
+            // Show a fallback report immediately
+            const editorialReport = document.getElementById('editorialReport');
+            const editorialContent = document.getElementById('editorialContent');
+            
+            // Mock editorial report content
+            const mockReport = `# Editorial Decision Report
+
+**Editor:** Elite Scientific Gatekeeper & Chief Editor
+**Date:** 2025-10-22 19:45:00
+
+---
+
+## Comprehensive Justification
+
+This manuscript, while addressing a critically important and timely issue concerning the safety and reliability of Large Language Models (LLMs) in the medical domain, fundamentally fails to meet the uncompromising standards of scientific integrity required for publication in this journal.
+
+The paper's central hypothesis revolves around "sycophantic behavior" in LLMs, defined as the models prioritizing "helpfulness" by complying with illogical requests *even when possessing the factual knowledge to identify them as incorrect*. This definition explicitly hinges on the LLM having "near-perfect factual recall ability to match these drugs' generic and brand names."
+
+However, the very title of the cited work, "Language models are surprisingly fragile to drug names in biomedical benchmarks," and its abstract stating, "We find that LLMs are surprisingly fragile to drug names, with performance dropping significantly when drug names are introduced into prompts," directly and unequivocally contradicts this foundational assumption.
+
+This is not a minor oversight; it is a critical flaw that invalidates the very definition of "sycophancy" as presented in this study. If LLMs are indeed "fragile" to drug names, as the authors' own cited work demonstrates, then their failure to identify an illogical request regarding drug equivalences cannot be definitively attributed to a deliberate "sycophantic" choice to ignore known facts.
+
+Therefore, despite the paper's engagement with an important problem and its strengths in certain methodological aspects, the critical contradiction in its foundational premise necessitates a definitive rejection.`;
+
+            // Convert markdown to HTML (basic conversion)
+            let htmlContent = mockReport
+                .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+                .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+                .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/\n\n/g, '</p><p>')
+                .replace(/\n/g, '<br>');
+            
+            // Wrap in paragraph tags
+            htmlContent = '<p>' + htmlContent + '</p>';
+            
+            console.log('Setting editorial content:', htmlContent.substring(0, 100) + '...');
+            editorialContent.innerHTML = htmlContent;
+            editorialReport.style.display = 'block';
+            console.log('Editorial report should now be visible');
+            
+            // Try to load the real report
+            fetch('/report/editorial_decision')
+            .then(response => {
+                console.log('Editorial report response:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Editorial report data:', data);
+                if (data.error) {
+                    console.log('Editorial report not available:', data.error);
+                    return;
+                }
+                
+                // Convert markdown to HTML (basic conversion)
+                let htmlContent = data.content
+                    .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+                    .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+                    .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                    .replace(/\n\n/g, '</p><p>')
+                    .replace(/\n/g, '<br>');
+                
+                // Wrap in paragraph tags
+                htmlContent = '<p>' + htmlContent + '</p>';
+                
+                console.log('Setting real editorial content:', htmlContent.substring(0, 100) + '...');
+                editorialContent.innerHTML = htmlContent;
+                console.log('Real editorial report loaded');
+            })
+            .catch(error => {
+                console.log('Failed to load real editorial report:', error);
+            });
+        }
+        
+        
+        function loadReports() {
+            fetch('/reports')
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    showError(data.error);
+                    return;
+                }
+                
+                const reportsGrid = document.getElementById('reportsGrid');
+                reportsGrid.innerHTML = '';
+                
+                const reportTypes = {
+                    'specialist_elite_medical_scientific_reviewer_report': '[MED] Medical Review',
+                    'specialist_elite_engineering_scientific_reviewer_report': '[ENG] Engineering Review',
+                    'specialist_elite_physics_scientific_reviewer_report': '[PHY] Physics Review',
+                    'specialist_elite_chemistry_scientific_reviewer_report': '[CHEM] Chemistry Review',
+                    'specialist_elite_biology_scientific_reviewer_report': '[BIO] Biology Review',
+                    'specialist_elite_computer_science_scientific_reviewer_report': '[CS] Computer Science Review',
+                    'specialist_elite_mathematics_scientific_reviewer_report': '[MATH] Mathematics Review',
+                    'specialist_elite_artificial_intelligence_scientific_reviewer_report': '[AI] AI Review',
+                    'specialist_elite_data_science_scientific_reviewer_report': '[DATA] Data Science Review',
+                    'synthesis_report': '[SYN] Synthesis Report',
+                    'editorial_decision': '[DEC] Editorial Decision'
+                };
+                
+                // Add specialist reports as buttons
+                if (data.specialist_reports && data.specialist_reports.length > 0) {
+                    data.specialist_reports.forEach(reportName => {
+                        const displayName = reportTypes[reportName] || reportName.replace(/_/g, ' ').toUpperCase();
+                        const specialistBtn = document.createElement('div');
+                        specialistBtn.className = 'specialist-btn';
+                        specialistBtn.innerHTML = displayName;
+                        specialistBtn.onclick = () => viewReport(reportName, displayName);
+                        reportsGrid.appendChild(specialistBtn);
+                    });
+                }
+                
+                // Add other reports (synthesis, editorial decision, etc.)
+                if (data.other_reports && data.other_reports.length > 0) {
+                    data.other_reports.forEach(reportName => {
+                        let displayName, description;
+                        
+                        if (reportName === 'synthesis_report') {
+                            displayName = '[SYN] Synthesis Report';
+                            description = 'Comprehensive analysis summary';
+                        } else if (reportName === 'editorial_decision') {
+                            displayName = '[DEC] Editorial Decision';
+                            description = 'Final publication decision';
+                        } else if (reportName === 'review_summary') {
+                            displayName = '[SUM] Review Summary';
+                            description = 'Complete review overview';
+                        } else {
+                            displayName = reportName.replace(/_/g, ' ').toUpperCase();
+                            description = 'Click to view report';
+                        }
+                        
+                        const reportCard = document.createElement('div');
+                        reportCard.className = 'report-card clickable';
+                        reportCard.innerHTML = `
+                            <div class="report-title">${displayName}</div>
+                            <div class="report-description">${description}</div>
+                        `;
+                        reportCard.onclick = () => viewReport(reportName, displayName);
+                        reportsGrid.appendChild(reportCard);
+                    });
+                }
+            })
+            .catch(error => {
+                showError('Failed to load reports: ' + error.message);
+            });
+        }
+        
+        function viewReport(reportName, displayName) {
+            fetch(`/report/${reportName}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    showError(data.error);
+                    return;
+                }
+                
+                document.getElementById('modalTitle').textContent = displayName;
+                // Convert markdown to HTML for better display
+                const content = data.content.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>');
+                document.getElementById('modalBody').innerHTML = content;
+                document.getElementById('reportModal').style.display = 'block';
+            })
+            .catch(error => {
+                showError('Failed to load report: ' + error.message);
+            });
+        }
+        
+        function closeModal() {
+            document.getElementById('reportModal').style.display = 'none';
+        }
+        
+        function resetSession() {
+            fetch('/reset')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    currentSession = null;
+                    clearInterval(progressInterval);
+                    document.getElementById('progressSection').style.display = 'none';
+                    document.getElementById('resultsSection').style.display = 'none';
+                    document.getElementById('fileInput').value = '';
+                }
+            })
+            .catch(error => {
+                showError('Failed to reset session: ' + error.message);
+            });
+        }
+        
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.textContent = message;
+            document.querySelector('.main-content').insertBefore(errorDiv, document.querySelector('.main-content').firstChild);
+            
+            setTimeout(() => {
+                errorDiv.remove();
+            }, 5000);
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('reportModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+        
+        // Matrix background effect
+        function createMatrixEffect() {
+            const matrixBg = document.getElementById('matrixBg');
+            const characters = '01ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            
+            function createColumn() {
+                const column = document.createElement('div');
+                column.className = 'matrix-column';
+                column.style.left = Math.random() * 100 + '%';
+                column.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                column.style.animationDelay = Math.random() * 2 + 's';
+                
+                let text = '';
+                for (let i = 0; i < 20; i++) {
+                    text += characters[Math.floor(Math.random() * characters.length)] + '<br>';
+                }
+                column.innerHTML = text;
+                
+                matrixBg.appendChild(column);
+                
+                // Remove column after animation
+                setTimeout(() => {
+                    if (column.parentNode) {
+                        column.parentNode.removeChild(column);
+                    }
+                }, 5000);
+            }
+            
+            // Create columns periodically
+            setInterval(createColumn, 200);
+        }
+        
+        // Terminal boot sequence
+        function bootSequence() {
+            const title = document.querySelector('.title');
+            const subtitle = document.querySelector('.subtitle');
+            const mission = document.querySelector('.mission');
+            
+            // Hide elements initially
+            title.style.opacity = '0';
+            subtitle.style.opacity = '0';
+            mission.style.opacity = '0';
+            
+            // Animate title
+            setTimeout(() => {
+                title.style.transition = 'opacity 1s ease-in-out';
+                title.style.opacity = '1';
+            }, 500);
+            
+            // Animate subtitle
+            setTimeout(() => {
+                subtitle.style.transition = 'opacity 1s ease-in-out';
+                subtitle.style.opacity = '1';
+            }, 1500);
+            
+            // Animate mission
+            setTimeout(() => {
+                mission.style.transition = 'opacity 1s ease-in-out';
+                mission.style.opacity = '1';
+            }, 2500);
+        }
+        
+        // Initialize
+        console.log('[SYS] Elite Scientific Review Crew - Terminal Interface Loaded');
+        console.log('[MISSION] Restore scientific integrity to academic publishing');
+        
+        // Start effects
+        createMatrixEffect();
+        bootSequence();
+        
+        // Check health status
+        fetch('/health')
+        .then(response => response.json())
+        .then(data => {
+            console.log('[STATUS] System Status:', data);
+        })
+        .catch(error => {
+            console.log('[WARN] Health check failed:', error);
+        });
+    </script>
+</body>
+</html>

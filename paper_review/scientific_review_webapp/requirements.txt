@@ -1,0 +1,27 @@
+# Elite Scientific Review Crew - Web Application Requirements
+
+# Core web framework
+Flask>=2.3.0
+Werkzeug>=2.3.0
+
+# File handling
+secure-filename>=1.0.0
+
+# Background processing
+threading
+
+# Date/time handling
+datetime
+
+# UUID generation
+uuid
+
+# JSON handling
+json
+
+# File system operations
+os
+sys
+
+# Import the main review system
+# (inherits from parent directory)

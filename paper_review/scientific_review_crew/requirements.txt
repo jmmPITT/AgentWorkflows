@@ -1,0 +1,27 @@
+# Core AI and ML dependencies
+crewai>=1.1.0
+crewai-tools>=0.1.0
+
+# Google Cloud and Vertex AI
+google-cloud-aiplatform>=1.38.0
+google-auth>=2.17.0
+google-auth-oauthlib>=1.0.0
+google-auth-httplib2>=0.1.0
+
+# PDF processing and image extraction
+PyMuPDF>=1.23.0
+Pillow>=10.0.0
+
+# Web search and API calls
+requests>=2.31.0
+httpx>=0.24.0
+
+# Data processing and utilities
+pydantic>=2.0.0
+python-dotenv>=1.0.0
+typing-extensions>=4.7.0
+
+# Development and testing (optional)
+pytest>=7.4.0
+black>=23.0.0
+flake8>=6.0.0
