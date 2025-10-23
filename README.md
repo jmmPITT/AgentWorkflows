@@ -1,6 +1,46 @@
-# Elite Scientific Review Crew
+# Agent Workflows Repository
 
+A collection of advanced AI agent workflows demonstrating multi-agent systems, data analysis, and intelligent automation.
+
+## 🤖 Projects
+
+### 1. Elite Scientific Review Crew
 A revolutionary AI-powered scientific review system that restores integrity to academic publishing by employing uncompromising standards for scientific rigor, reproducibility, and intellectual honesty.
+
+### 2. Transaction History Analysis
+An intelligent financial analysis system that processes transaction data and generates comprehensive business insights using AI agents.
+
+## 📁 Repository Structure
+
+```
+AgentWorkflows/
+├── scientific_review_crew/           # Scientific Review System
+│   ├── scientific_review_webapp/     # Interactive Web Application
+│   ├── src/                          # Core agent definitions
+│   ├── reports/                      # Generated review reports
+│   └── README.md                     # Scientific Review documentation
+└── TransactionHistoryAnalysis/       # Financial Analysis System
+    ├── app.py                        # Main application
+    ├── app_agents.py                 # Agent definitions
+    ├── example_outputs/              # Sample analysis results
+    └── README.md                     # Transaction Analysis documentation
+```
+
+## 🚀 Quick Start
+
+### Scientific Review Crew
+```bash
+cd scientific_review_crew/scientific_review_webapp
+python complete_app.py
+# Open http://localhost:5000
+```
+
+### Transaction History Analysis
+```bash
+cd TransactionHistoryAnalysis
+python app.py
+# Follow the prompts for data analysis
+```
 
 ## 🎯 Mission
 
